@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Voice Cloning & Text-to-Speech</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>AI Voice Cloning & Text-to-Speech</h1>
+            <p class="header__subtitle">Clone voices and generate natural-sounding speech with downloadable audio files</p>
+        </header>
+
+        <!-- Setup Section -->
+        <section class="setup-section">
+            <div class="card">
+                <div class="card__header">
+                    <h2>🚀 Quick Setup</h2>
+                </div>
+                <div class="card__body">
+                    <div class="setup-steps">
+                        <div class="step">
+                            <div class="step__number">1</div>
+                            <div class="step__content">
+                                <h3>Choose TTS Service</h3>
+                                <div class="service-selector">
+                                    <label class="form-label">Select your preferred service:</label>
+                                    <select id="serviceSelect" class="form-control">
+                                        <option value="">Choose a service...</option>
+                                        <option value="elevenlabs">ElevenLabs (Recommended) - 10k chars/month free</option>
+                                        <option value="speechify">Speechify - 100k chars/month free</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="step">
+                            <div class="step__number">2</div>
+                            <div class="step__content">
+                                <h3>Get API Key</h3>
+                                <div id="apiInstructions" class="api-instructions hidden">
+                                    <div id="elevenlabsInstructions" class="service-instructions hidden">
+                                        <ol>
+                                            <li>Go to <a href="https://elevenlabs.io" target="_blank">ElevenLabs.io</a></li>
+                                            <li>Sign up for a free account</li>
+                                            <li>Navigate to Profile → API Keys</li>
+                                            <li>Click "Create API Key"</li>
+                                            <li>Copy the generated key</li>
+                                        </ol>
+                                    </div>
+                                    <div id="speechifyInstructions" class="service-instructions hidden">
+                                        <ol>
+                                            <li>Go to <a href="https://speechify.com" target="_blank">Speechify.com</a></li>
+                                            <li>Sign up for an account</li>
+                                            <li>Navigate to Developer Settings</li>
+                                            <li>Generate API Key</li>
+                                            <li>Copy the generated key</li>
+                                        </ol>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="step">
+                            <div class="step__number">3</div>
+                            <div class="step__content">
+                                <h3>Configure API</h3>
+                                <div class="form-group">
+                                    <label for="apiKey" class="form-label">Enter your API Key:</label>
+                                    <input type="password" id="apiKey" class="form-control" placeholder="Paste your API key here...">
+                                    <button id="testConnection" class="btn btn--secondary mt-8" disabled>Test Connection</button>
+                                </div>
+                                <div id="connectionStatus" class="connection-status hidden"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Voice Cloning Section -->
+        <section id="voiceCloningSection" class="voice-cloning-section hidden">
+            <div class="card">
+                <div class="card__header">
+                    <h2>🎤 Voice Cloning</h2>
+                    <p>Upload a voice sample to create your custom voice (like Celia Drummond's Tyne & Wear Metro announcements)</p>
+                </div>
+                <div class="card__body">
+                    <div class="upload-section">
+                        <div class="form-group">
+                            <label for="voiceFile" class="form-label">Upload Voice Sample (MP3, WAV, OGG)</label>
+                            <input type="file" id="voiceFile" class="form-control" accept="audio/*">
+                            <small class="help-text">Recommended: 30-60 seconds of clear speech, like the Celia Drummond sample</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="voiceName" class="form-label">Voice Name</label>
+                            <input type="text" id="voiceName" class="form-control" placeholder="e.g., Celia Metro Voice">
+                        </div>
+
+                        <button id="cloneVoice" class="btn btn--primary" disabled>Clone Voice</button>
+                    </div>
+
+                    <div id="cloneProgress" class="progress-section hidden">
+                        <div class="progress-bar">
+                            <div class="progress-fill"></div>
+                        </div>
+                        <p class="progress-text">Cloning your voice...</p>
+                    </div>
+
+                    <div id="cloneResult" class="clone-result hidden"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Text-to-Speech Section -->
+        <section id="ttsSection" class="tts-section hidden">
+            <div class="card">
+                <div class="card__header">
+                    <h2>🔊 Generate Speech</h2>
+                </div>
+                <div class="card__body">
+                    <div class="form-group">
+                        <label for="textInput" class="form-label">Enter text to convert to speech:</label>
+                        <textarea id="textInput" class="form-control" rows="6" placeholder="Type your text here... e.g., 'The next train to Newcastle will arrive at platform 2 in 3 minutes.'"></textarea>
+                        <div class="character-count">
+                            <span id="charCount">0</span> characters
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="voiceSelect" class="form-label">Select Voice:</label>
+                        <select id="voiceSelect" class="form-control">
+                            <option value="">Choose a voice...</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="formatSelect" class="form-label">Audio Format:</label>
+                        <select id="formatSelect" class="form-control">
+                            <option value="mp3">MP3 (Most Compatible)</option>
+                            <option value="ogg">OGG (Better Quality)</option>
+                        </select>
+                    </div>
+
+                    <button id="generateSpeech" class="btn btn--primary btn--lg" disabled>Generate Speech</button>
+
+                    <div id="generateProgress" class="progress-section hidden">
+                        <div class="progress-bar">
+                            <div class="progress-fill"></div>
+                        </div>
+                        <p class="progress-text">Generating speech...</p>
+                    </div>
+
+                    <div id="audioResult" class="audio-result hidden">
+                        <div class="audio-player">
+                            <audio id="audioPlayer" controls></audio>
+                        </div>
+                        <div class="download-section">
+                            <button id="downloadAudio" class="btn btn--secondary">Download Audio</button>
+                            <div class="download-info">
+                                <span id="downloadFormat"></span> • <span id="downloadSize"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- GitHub Pages Setup Instructions -->
+        <section class="github-setup">
+            <div class="card">
+                <div class="card__header">
+                    <h2>📋 GitHub Pages Setup</h2>
+                    <p>Follow these steps to deploy this website to your own GitHub Pages</p>
+                </div>
+                <div class="card__body">
+                    <ol class="setup-list">
+                        <li>Create a new GitHub repository</li>
+                        <li>Upload the website files (index.html, style.css, app.js)</li>
+                        <li>Go to repository Settings → Pages</li>
+                        <li>Select 'Deploy from a branch'</li>
+                        <li>Choose 'main' branch and '/ (root)' folder</li>
+                        <li>Wait 5-10 minutes for deployment</li>
+                        <li>Access your site at username.github.io/repository-name</li>
+                    </ol>
+                    <div class="status status--info">
+                        <strong>Note:</strong> Your API keys are stored only in your browser session for security
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Troubleshooting -->
+        <section class="troubleshooting">
+            <div class="card">
+                <div class="card__header">
+                    <h2>🔧 Troubleshooting</h2>
+                </div>
+                <div class="card__body">
+                    <div class="faq">
+                        <div class="faq-item">
+                            <h4>Voice cloning failed?</h4>
+                            <p>Ensure your audio file is clear, 30-60 seconds long, and in MP3/WAV format.</p>
+                        </div>
+                        <div class="faq-item">
+                            <h4>API connection issues?</h4>
+                            <p>Double-check your API key and ensure you have sufficient credits in your account.</p>
+                        </div>
+                        <div class="faq-item">
+                            <h4>Audio not downloading?</h4>
+                            <p>Try right-clicking the audio player and selecting "Save audio as..."</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="footer">
+            <p>&copy; 2025 AI Voice Cloning Tool. Built for GitHub Pages deployment.</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
